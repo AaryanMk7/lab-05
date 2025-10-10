@@ -1,41 +1,58 @@
 package com.example.lab5_starter;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 
 public class CityArrayAdapter extends ArrayAdapter<City> {
-    private ArrayList<City> cities;
-    private Context context;
 
-    public CityArrayAdapter(Context context, ArrayList<City> cities){
+    private final Context context;
+    private final ArrayList<City> cities;
+
+    public CityArrayAdapter(Context context, ArrayList<City> cities) {
         super(context, 0, cities);
-        this.cities = cities;
         this.context = context;
+        this.cities = cities;
     }
 
-    @NonNull
-    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent){
-        View view = convertView;
-        if (view == null){
-            view = LayoutInflater.from(context).inflate(R.layout.layout_city, parent, false);
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        City city = getItem(position);
+
+        if (convertView == null) {
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.layout_city, parent, false);
         }
 
-        City city = cities.get(position);
-        TextView movieName = view.findViewById(R.id.textCityName);
-        TextView movieYear = view.findViewById(R.id.textCityProvince);
+        TextView cityName = convertView.findViewById(R.id.textCityName);
+        TextView provinceName = convertView.findViewById(R.id.textProvinceName);
+        Button deleteButton = convertView.findViewById(R.id.buttonDelete);
 
-        movieName.setText(city.getName());
-        movieYear.setText(city.getProvince());
+        if (city != null) {
+            cityName.setText(city.getName());
+            provinceName.setText(city.getProvince());
+        }
 
-        return view;
+        // Handle delete click
+        deleteButton.setOnClickListener(v -> {
+            if (context instanceof MainActivity) {
+                new AlertDialog.Builder(context)
+                        .setTitle("Delete City")
+                        .setMessage("Are you sure you want to delete " + city.getName() + "?")
+                        .setPositiveButton("Delete", (dialog, which) -> {
+                            ((MainActivity) context).deleteCity(city);
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .show();
+            }
+        });
+
+        return convertView;
     }
 }
